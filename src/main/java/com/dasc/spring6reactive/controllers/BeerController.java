@@ -52,14 +52,14 @@ public class BeerController {
   public ResponseEntity<Void> updateBeer(@PathVariable Integer beerId,
       @Validated @RequestBody BeerDTO beerDTO) {
     beerService.updateBeer(beerId, beerDTO).subscribe();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @PatchMapping(BEER_PATH_ID)
   public ResponseEntity<Void> updateBeerPatch(@PathVariable Integer beerId,
       @Validated @RequestBody BeerDTO beerDTO) {
     beerService.updateBeerPatch(beerId, beerDTO).subscribe();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping(BEER_PATH_ID)
