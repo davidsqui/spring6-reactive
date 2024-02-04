@@ -4,6 +4,7 @@ import com.dasc.spring6reactive.model.BeerDTO;
 import com.dasc.spring6reactive.services.BeerService;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,7 +36,8 @@ public class BeerController {
 
   @GetMapping(BEER_PATH_ID)
   public Mono<BeerDTO> getBeerById(@PathVariable Integer beerId) {
-    return beerService.getBeerById(beerId);
+    return beerService.getBeerById(beerId)
+        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
   }
 
   @PostMapping(BEER_PATH)
@@ -49,22 +52,27 @@ public class BeerController {
   }
 
   @PutMapping(BEER_PATH_ID)
-  public ResponseEntity<Void> updateBeer(@PathVariable Integer beerId,
+  public Mono<ResponseEntity<Void>> updateBeer(@PathVariable Integer beerId,
       @Validated @RequestBody BeerDTO beerDTO) {
-    beerService.updateBeer(beerId, beerDTO).subscribe();
-    return ResponseEntity.noContent().build();
+    return beerService.updateBeer(beerId, beerDTO)
+        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+        .map(savedBeer -> ResponseEntity.noContent().build());
   }
 
   @PatchMapping(BEER_PATH_ID)
-  public ResponseEntity<Void> updateBeerPatch(@PathVariable Integer beerId,
+  public Mono<ResponseEntity<Void>> updateBeerPatch(@PathVariable Integer beerId,
       @Validated @RequestBody BeerDTO beerDTO) {
-    beerService.updateBeerPatch(beerId, beerDTO).subscribe();
-    return ResponseEntity.noContent().build();
+    return beerService.updateBeerPatch(beerId, beerDTO)
+        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+        .map(savedBeer -> ResponseEntity.noContent().build());
+
   }
 
   @DeleteMapping(BEER_PATH_ID)
-  public ResponseEntity<Void> deleteBeer(@PathVariable Integer beerId) {
-    beerService.deleteBeer(beerId).subscribe();
-    return ResponseEntity.noContent().build();
+  public Mono<ResponseEntity<Void>> deleteBeer(@PathVariable Integer beerId) {
+    return getBeerById(beerId)
+        .map(foundBeer -> beerService.deleteBeer(beerId))
+        .thenReturn(ResponseEntity.noContent().build());
   }
+
 }
