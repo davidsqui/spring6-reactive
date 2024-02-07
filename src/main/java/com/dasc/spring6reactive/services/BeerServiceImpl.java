@@ -3,6 +3,7 @@ package com.dasc.spring6reactive.services;
 import com.dasc.spring6reactive.mappers.BeerMapper;
 import com.dasc.spring6reactive.model.BeerDTO;
 import com.dasc.spring6reactive.repositories.BeerRepository;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -59,13 +60,13 @@ public class BeerServiceImpl implements BeerService {
           if (StringUtils.hasText(beerDTO.getBeerStyle())) {
             foundBeer.setBeerStyle(beerDTO.getBeerStyle());
           }
-          if (StringUtils.hasText(beerDTO.getPrice().toString())) {
+          if (!Objects.isNull(beerDTO.getPrice())) {
             foundBeer.setPrice(beerDTO.getPrice());
           }
           if (StringUtils.hasText(beerDTO.getUpc())) {
             foundBeer.setUpc(beerDTO.getUpc());
           }
-          if (StringUtils.hasText(beerDTO.getQuantityOnHand().toString())) {
+          if (!Objects.isNull(beerDTO.getQuantityOnHand())) {
             foundBeer.setQuantityOnHand(beerDTO.getQuantityOnHand());
           }
 
